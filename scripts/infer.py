@@ -1,28 +1,48 @@
+import os
+import sys
+import argparse
+import numpy as np
+from tqdm import tqdm
+from scipy import io
+import warnings
+
+warnings.filterwarnings("ignore")
+
+import torch
+
 from models.baseline_model import FNO2D
 from src.utils.config import load_config
 from src.utils.utilities3 import *
 
-import warnings
-warnings.filterwarnings("ignore")
+# -----------------------
+# Args
+# -----------------------
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--input_loc", type=str, default=None)
+parser.add_argument("--min_max_file", type=str, default=None)
 
-import torch
-import numpy as np
-from scipy import io
-import os
-from tqdm import tqdm
+args = parser.parse_args()
 
 # -----------------------
 # Load config
-# -------
+# -----------------------
 
 cfg = load_config("configs/infer.yaml")
+
+if args.input_loc is not None:
+    cfg.paths.input_loc = args.input_loc
+
+if args.min_max_file is not None:
+    cfg.paths.min_max_file = args.min_max_file
 
 torch.manual_seed(0)
 np.random.seed(0)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
+print(f"INPUT_LOC: {cfg.paths.input_loc}")
+print(f"MIN_MAX_FILE: {cfg.paths.min_max_file}")
 
 # -----------------------
 # Load min-max
@@ -46,7 +66,7 @@ time_out = cfg.data.time_out
 T  = time_input + time_out
 S1 = cfg.data.S1
 S2 = cfg.data.S2
-lat, long   = S1, S2
+lat, long = S1, S2
 
 met_variables = cfg.features.met_variables
 emission_variables = cfg.features.emission_variables
@@ -56,25 +76,8 @@ savepath = cfg.paths.input_loc
 V = cfg.features.V
 
 # -----------------------
-# Normalization
+# Dataset
 # -----------------------
-
-def normalize_data(data, min_max, key, *, wind=False, clip=False):
-
-    maxx = float(min_max[f"{key}_max"])
-    minn = float(min_max[f"{key}_min"])
-    den = maxx - minn
-
-    if wind:
-        data = (2 * (data - minn) / den) - 1
-    else:
-        data = (data - minn) / den
-
-    if clip:
-        data = np.clip(data, 0, 1)
-
-    return data.astype(np.float32)
-
 
 class DataLoaders(torch.utils.data.Dataset):
 
@@ -141,9 +144,9 @@ test_loader = torch.utils.data.DataLoader(
     pin_memory=True
 )
 
-# =========================================================
+# -----------------------
 # Model
-# =========================================================
+# -----------------------
 
 checkpoint = torch.load(cfg.paths.checkpoint, map_location=device)
 
@@ -158,9 +161,9 @@ model = FNO2D(
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 
-# =========================================================
-# Inference on test set
-# =========================================================
+# -----------------------
+# Inference
+# -----------------------
 
 os.makedirs(os.path.dirname(cfg.paths.output_loc), exist_ok=True)
 
@@ -173,6 +176,7 @@ with torch.no_grad():
         prediction[i] = out.cpu().numpy()
 
 prediction = denorm(prediction)
-np.save(os.path.join(cfg.paths.output_loc,'preds.npy'), prediction)
+
+np.save(os.path.join(cfg.paths.output_loc, 'preds.npy'), prediction)
 
 print("Saved predictions to:", cfg.paths.output_loc)
