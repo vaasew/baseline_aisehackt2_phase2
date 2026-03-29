@@ -9,8 +9,8 @@ paths:
 
 
 data:
-  ntrain: 2112
-  ntest: 528
+  ntrain: 2268
+  ntest: 564
   total_time: 26
   time_input: 10
   time_out: 16
@@ -31,13 +31,13 @@ features:
 
 model:
   modes: 12
-  width: 32
+  width: 48
 
 training:
   batch_size: 6
-  epochs: 80
+  epochs: 50
   lr: 2e-3
   weight_decay: 1e-4
-  scheduler_step: 18
+  scheduler_step: 10
   scheduler_gamma: 0.5
-  checkpoint_every: 20
+  checkpoint_every: 10
