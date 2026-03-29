@@ -1,6 +1,6 @@
 # Baseline Pipeline with FNO2D Model
 
-This repository provides a **reference baseline pipeline** for the Kaggle competition **[AISEHACK Theme 2 - Pollution Forecasting](https://www.kaggle.com/competitions/aisehack-theme-2/overview)**, demonstrating a complete end-to-end workflow using a **2D Fourier Neural Operator (FNO2D)** implementation. It is intended as a **clear, minimal, and reproducible example** rather than a production-optimized solution.
+This repository provides a **reference baseline pipeline** for the Kaggle competition **[AISEHACK Theme 2 - Pollution Forecasting](https://www.kaggle.com/competitions/aisehack-theme-2/overview)**, demonstrating a complete end-to-end workflow using a **2D Fourier Neural Operator (FNO2D)** implementation. It is intended as a **clear, minimal, and reproducible example** rather than a performance or production optimized solution.
 
 ---
 
@@ -52,7 +52,7 @@ The workflow is organized into **three sequential stages**:
 ### Recommended Setup
 
 1. Upload this repository as a **Kaggle Dataset**
-2. Open the provided **baseline Kaggle notebook**: **[Link](https://www.kaggle.com/code/siddharthandileep/baseline-run-aisehack-test/)**, Copy and Edit the same.
+2. Open the provided **baseline Kaggle notebook**: **[Link](https://www.kaggle.com/code/siddharthandileep/phase2-baseline-run-aisehack/)**, Copy and Edit the same.
 3. Add:
    - This repository (as a dataset)
    - The official competition dataset
@@ -63,15 +63,6 @@ The execution will emulate the baseline run:
 - Read scripts and configs from this repository
 - Execute dataset preparation, training, and inference
 - Produce the final `preds.npy` submission file
-
----
-
-## Intended Audience
-
-This codebase is suitable for:
-- First-time participants looking for a **clean starting point**
-- Users unfamiliar with FNO-based spatio-temporal modeling
-- Competitors who want a **working end-to-end baseline** before experimentation
 
 ---
 
@@ -86,9 +77,9 @@ This codebase is suitable for:
 
 ## Kaggle Data Locations for the Pipeline
 
-- **Raw training data:** `/kaggle/input/competitions/aisehack-theme-2/raw/<MONTH>/<feature>.npy`
-- **Test inputs:** `/kaggle/input/competitions/aisehack-theme-2/test_in/<feature>.npy`
-- **Min–max statistics:** `/kaggle/input/competitions/aisehack-theme-2/stats/feat_min_max.mat`
+- **Raw training data:** `/kaggle/input/competitions/anrf-aise-hack-phase-2-theme-2-pollution-forecasting-iitd/aisehack-theme-2/raw/<MONTH>/<feature>.npy`
+- **Test inputs:** `/kaggle/input/competitions/anrf-aise-hack-phase-2-theme-2-pollution-forecasting-iitd/aisehack-theme-2/test_in/<feature>.npy`
+- **Min–max statistics:** `/kaggle/input/competitions/anrf-aise-hack-phase-2-theme-2-pollution-forecasting-iitd/aisehack-theme-2/stats/feat_min_max.mat`
 - **Prepared datasets:** `/kaggle/temp/data/train/`, `/kaggle/temp/data/val/`
 - **Checkpoints & logs:** `/kaggle/working/experiments/baseline/`
 - **Final predictions:** `/kaggle/working/preds.npy`
@@ -152,12 +143,18 @@ Each stage depends strictly on outputs produced by the previous step.
 
 ## Baseline Notebook — Execution Details
 
+**Model**
+- Number of Parameters - 1038152
+- Number of FNO2D Block  3
+- d_model/width - 48
+- modes kept - 12
+
 **Hardware**
 - GPU: P100
 
 **Runtime**
 - ~350 seconds per epoch
-- ~9.8 hours for the complete run
+- ~6 hours for the complete run
 
 **Disk Usage**
 - ~78 GB written during execution
