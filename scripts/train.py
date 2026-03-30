@@ -13,7 +13,6 @@ import json
 from tqdm import tqdm
 import os
 import time
-from timeit import default_timer
 
 # -----------------------
 # Load config
@@ -68,7 +67,6 @@ class DataLoaders(torch.utils.data.Dataset):
         self.all_features = all_features
 
         if split == "train":
-
             base_path = savepath_train
         elif split == "val":
             base_path = savepath_val
@@ -164,21 +162,24 @@ log = []
 # Training
 # =========================================================
 
+best_val_loss = float("inf")
+best_model_path = path1.replace(".pt", "_best.pt")
+
 for ep in tqdm(range(epochs)):
     model.train()
     t_epoch_start = time.time()
 
     train_l2 = 0.0
 
-
     for x, y in train_loader:
-
-
         x = x.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
+
         optimizer.zero_grad(set_to_none=True)
+
         out = model(x).view(x.size(0), S1, S2, time_out)
         l2 = myloss(out, y)
+
         l2.backward()
         optimizer.step()
 
@@ -188,10 +189,12 @@ for ep in tqdm(range(epochs)):
 
     model.eval()
     test_l2 = 0.0
+
     with torch.no_grad():
         for x, y in test_loader:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
+
             out = model(x).view(x.size(0), S1, S2, time_out)
             test_l2 += myloss(out, y).item()
 
@@ -199,8 +202,6 @@ for ep in tqdm(range(epochs)):
     test_l2  /= len(test_dataset)
 
     t_epoch_end = time.time()
-    n_batches = len(train_loader)
-
 
     log.append({
         "epoch": ep,
@@ -211,8 +212,23 @@ for ep in tqdm(range(epochs)):
 
     print(ep, t_epoch_end - t_epoch_start, train_l2, test_l2)
 
+    if test_l2 < best_val_loss:
+        best_val_loss = test_l2
+
+        torch.save({
+            'epoch': ep,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            'val_loss': best_val_loss
+        }, best_model_path)
+
+        print(f"[BEST] Saved at epoch {ep} | val_loss={best_val_loss:.6f}")
+
+    # ================= REGULAR CHECKPOINT =================
     if (ep + 1) % cfg.training.checkpoint_every == 0:
         ckpt_path = path1.replace(".pt", f"_ep{ep}.pt")
+
         torch.save({
             'epoch': ep,
             'model_state_dict': model.state_dict(),

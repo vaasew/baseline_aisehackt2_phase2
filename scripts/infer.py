@@ -21,7 +21,7 @@ from src.utils.utilities3 import *
 parser = argparse.ArgumentParser()
 parser.add_argument("--input_loc", type=str, default=None)
 parser.add_argument("--min_max_file", type=str, default=None)
-
+parser.add_argument("--model_path", type=str, default=None)
 args = parser.parse_args()
 
 # -----------------------
@@ -144,11 +144,20 @@ test_loader = torch.utils.data.DataLoader(
     pin_memory=True
 )
 
+
 # -----------------------
-# Model
+# Load Model
 # -----------------------
 
-checkpoint = torch.load(cfg.paths.checkpoint, map_location=device)
+if args.model_path is None:
+    raise ValueError("Please provide --model_path")
+
+if not os.path.exists(args.model_path):
+    raise FileNotFoundError(f"Model not found at {args.model_path}")
+
+checkpoint = torch.load(args.model_path, map_location=device)
+
+print(f"Loaded model from: {args.model_path}")
 
 model = FNO2D(
     time_in=time_input,
