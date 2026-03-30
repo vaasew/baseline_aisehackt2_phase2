@@ -24,12 +24,15 @@ The workflow is organized into **three sequential stages**:
 
 1. **Dataset Preparation(prepare_dataset.py)**  
    Converts raw competition data into normalized, fixed-length spatio-temporal samples suitable for model training.
+   Arguments - `raw_path, min_max_file`
 
 2. **Model Training(train.py)**  
    Trains an FNO2D model using the prepared datasets to forecast future PM2.5 concentration fields.
 
 3. **Inference(infer.py)**  
    Runs the trained model on unseen test data and generates predictions in the format required for Kaggle submission.
+   Arguments - `input_loc, min_max_file, model_path`
+
 
 - Each stage produces artifacts that are consumed by the next stage.
 
